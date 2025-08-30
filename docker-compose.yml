@@ -1,0 +1,32 @@
+# docker-compose.yml - Basato sul tuo setup originale
+services:
+  mcp-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: mcp-api-container
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL=${MODEL}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - PYTHONPATH=/app
+    env_file:
+      - .env
+    volumes:
+      # Mount per logs
+      - ./logs:/app/logs
+
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # # Limiti di risorse (opzionale)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 1G
+    #       cpus: '0.5'

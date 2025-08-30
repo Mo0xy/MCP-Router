@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>MCPassay.md</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+html,footer,header{
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Custom MD PDF CSS
+ */
+html,footer,header{
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+
+ }
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+<link rel="stylesheet" href="file:///r%3A/2.Travail/1.Enseignement/Cours/_1.Outils/2.Developpement/1.SCSS/main.css" type="text/css"><link rel="stylesheet" href="file:///d%3A/rdaros/Cours/_1.Outils/2.Developpement/1.SCSS/main.css" type="text/css">
+</head>
+
+<body>
+    <h1 id="relazione-sul-model-context-protocol-mcp"><strong>Relazione sul Model Context Protocol (MCP)</strong></h1>
+<h2 id="cos%C3%A8-il-model-context-protocol-mcp"><strong>Cos'è il Model Context Protocol (MCP)</strong></h2>
+<p>Il <strong>Model Context Protocol (MCP)</strong> rappresenta un paradigma innovativo di comunicazione tra modelli linguistici di grandi dimensioni (<strong>LLM</strong>) e strumenti esterni. MCP fornisce un livello di astrazione che consente di fornire al modello contesto operativo e accesso a strumenti specializzati senza la necessità di implementare manualmente codice di integrazione per ciascun servizio. In questo modo, lo sviluppo di applicazioni basate su LLM risulta notevolmente semplificato e più modulare.</p>
+<h2 id="il-problema-affrontato-da-mcp"><strong>Il problema affrontato da MCP</strong></h2>
+<p>Lo sviluppo di sistemi intelligenti che utilizzano LLM in ambienti reali spesso richiede l'accesso a servizi esterni complessi, come ad esempio API pubbliche o private. Consideriamo, ad esempio, un'applicazione in cui l'utente desidera porre domande al LLM sui propri dati GitHub: una richiesta come <em>&quot;Quali pull request aperte ho in tutti i miei repository?&quot;</em> implica una conoscenza approfondita dell'API di GitHub e la capacità di effettuare chiamate contestuali.</p>
+<p>Senza MCP, il team di sviluppo dovrebbe:</p>
+<ul>
+<li>Definire e implementare manualmente ogni singolo strumento (tool) corrispondente alle funzionalità di GitHub.</li>
+<li>Gestire la comunicazione tra il modello e il servizio esterno.</li>
+<li>Scrivere e mantenere un considerevole volume di codice di integrazione.</li>
+<li>Garantire aggiornamenti costanti in caso di modifiche alle API esterne.</li>
+</ul>
+<p>Questo approccio è <strong>oneroso, complesso e difficile da scalare</strong>, soprattutto quando si vogliono supportare numerosi servizi e strumenti.</p>
+<p>MCP affronta questo problema in modo strutturato, consentendo di <strong>delegare l'implementazione, l'esecuzione e la manutenzione degli strumenti</strong> a server specializzati (MCP Server), riducendo drasticamente la complessità sul lato applicativo (client).</p>
+<h2 id="struttura-e-funzionamento-del-model-context-protocol"><strong>Struttura e funzionamento del Model Context Protocol</strong></h2>
+<p>MCP si basa su due componenti principali:</p>
+<ul>
+<li><strong>MCP Client</strong>: È l'interfaccia principale tra il tuo server e uno o più MCP Server. Si occupa di inviare richieste, ricevere risposte e gestire il protocollo di comunicazione.</li>
+<li><strong>MCP Server</strong>: È un'interfaccia specializzata che incapsula l'accesso a un servizio esterno (es. GitHub), esponendo un insieme standardizzato di strumenti e risorse utilizzabili dal LLM.</li>
+</ul>
+<hr>
+<p><img src="image-4.png" alt="alt text"></p>
+<hr>
+<p>Un aspetto fondamentale di MCP è la sua <strong>indipendenza dal trasporto</strong> (“transport agnostic”). Il protocollo può essere implementato usando diversi canali di comunicazione, tra cui:</p>
+<ul>
+<li><strong>Input/Output standard</strong> (sul medesimo host)</li>
+<li><strong>HTTP</strong></li>
+<li><strong>WebSocket</strong></li>
+<li><strong>Altri protocolli di rete</strong></li>
+</ul>
+<div style="display: flex; align-items: center; gap: 16px;">
+   <img src="image-2.png" alt="alt text" style="max-width: 48%; height: auto;">
+   <img src="image-3.png" alt="alt text" style="max-width: 48%; height: auto;">
+</div>
+<h2 id="tipi-di-messaggi"><strong>Tipi di messaggi</strong></h2>
+<p>Il protocollo MCP definisce una serie di messaggi che regolano la comunicazione tra client e server. Tra i più importanti:</p>
+<ul>
+<li><code>ListToolsRequest</code> / <code>ListToolsResult</code>: Permette al client di ottenere la lista degli strumenti disponibili presso un dato MCP Server.</li>
+<li><code>CallToolRequest</code> / <code>CallToolResult</code>: Permette di invocare uno specifico strumento ed ottenere il risultato dell’esecuzione.</li>
+</ul>
+<p><img src="image-1.png" alt="alt text"></p>
+<h2 id="flusso-operativo-completo-dal-llm-al-servizio-esterno"><strong>Flusso operativo completo: dal LLM al servizio esterno</strong></h2>
+<h2 id="alt-text"><img src="image.png" alt="alt text"></h2>
+<p>La seguente sequenza descrive il flusso completo di interazione tra utente, applicazione, LLM, MCP e un servizio esterno. Questo schema evidenzia la <strong>modularità</strong> e la <strong>chiarezza delle responsabilità</strong> offerte da MCP:</p>
+<ol>
+<li>
+<p><strong>Richiesta dell’utente</strong><br>
+L'utente invia una richiesta all'applicazione, ad esempio:<br>
+<em>&quot;Quali repository ho su GitHub?&quot;</em></p>
+</li>
+<li>
+<p><strong>Scoperta degli strumenti</strong><br>
+L'applicazione ha bisogno di sapere quali strumenti può mettere a disposizione del LLM per rispondere alla domanda.</p>
+</li>
+<li>
+<p><strong>Interrogazione del client MCP</strong><br>
+L'applicazione invia una <code>ListToolsRequest</code> (richiesta per conoscere gli strumenti disponibili) al <strong>client MCP</strong>, il componente che funge da ponte tra l’applicazione e il server MCP.</p>
+</li>
+<li>
+<p><strong>Risposta dal server MCP</strong><br>
+Il <strong>server MCP</strong> (servizio specializzato che gestisce l’accesso a uno strumento esterno, come l’API di GitHub) risponde con una <code>ListToolsResult</code>, contenente la lista degli strumenti disponibili (es. <code>get_repos</code>, <code>get_pull_requests</code>, ecc.).</p>
+</li>
+<li>
+<p><strong>Inoltro al LLM</strong><br>
+L'applicazione passa al LLM sia la richiesta dell’utente che la lista degli strumenti disponibili.</p>
+</li>
+<li>
+<p><strong>Decisione del LLM</strong><br>
+Il LLM analizza la richiesta e decide di utilizzare uno specifico strumento per ottenere le informazioni richieste (ad esempio <code>get_repos</code>).</p>
+</li>
+<li>
+<p><strong>Esecuzione dello strumento</strong><br>
+L'applicazione invia una <code>CallToolRequest</code> (richiesta di esecuzione di uno strumento) al client MCP, specificando lo strumento scelto e i parametri necessari.</p>
+</li>
+<li>
+<p><strong>Chiamata al servizio esterno</strong><br>
+Il server MCP esegue la chiamata verso il servizio esterno (ad esempio l’API di GitHub) e raccoglie i dati richiesti.</p>
+</li>
+<li>
+<p><strong>Risposta dello strumento</strong><br>
+I dati ottenuti vengono restituiti al client MCP tramite un messaggio <code>CallToolResult</code>.</p>
+</li>
+<li>
+<p><strong>Consegna dei dati al LLM</strong><br>
+L'applicazione riceve i dati dal client MCP e li invia al LLM.</p>
+</li>
+<li>
+<p><strong>Formulazione della risposta finale</strong><br>
+Il LLM elabora una risposta testuale basata sulle informazioni ricevute.</p>
+</li>
+<li>
+<p><strong>Risposta all’utente</strong><br>
+Infine, l'applicazione restituisce la risposta generata all’utente.</p>
+</li>
+</ol>
+<h2 id="conclusione"><strong>Conclusione</strong></h2>
+<p>Il <strong>Model Context Protocol</strong> è una risposta efficace e scalabile alla crescente complessità di integrazione tra LLM e servizi esterni. MCP consente infatti di delegare completamente la gestione degli strumenti a server dedicati, rendendo più facile sviluppare applicazioni complesse e riducendo drasticamente l’onere di sviluppo e manutenzione.</p>
+<p>La trasparenza del flusso di controllo e la netta separazione delle responsabilità rendono MCP l’architettura adatta per costruire sistemi intelligenti che possono interagire dinamicamente con il mondo esterno.</p>
+
+</body>
+
+</html>

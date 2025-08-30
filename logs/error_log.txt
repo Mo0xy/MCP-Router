@@ -1,0 +1,18 @@
+Exception occurred:
+Traceback (most recent call last):
+  File "/app/api/v1/mcp_run.py", line 43, in run_mcp_async
+    doc_client = await stack.enter_async_context(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/contextlib.py", line 659, in enter_async_context
+    result = await _enter(cm)
+             ^^^^^^^^^^^^^^^^
+  File "/app/mcp_client.py", line 102, in __aenter__
+    await self.connect()
+  File "/app/mcp_client.py", line 42, in connect
+    await self._session.initialize()
+  File "/usr/local/lib/python3.12/site-packages/mcp/client/session.py", line 151, in initialize
+    result = await self.send_request(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/mcp/shared/session.py", line 286, in send_request
+    raise McpError(response_or_error.error)
+mcp.shared.exceptions.McpError: Connection closed
