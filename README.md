@@ -1,4 +1,4 @@
-# MCP API Project
+# MCP-Router Project
 
 MCP API Project is a FastAPI-based API that implements the Model Context Protocol (MCP), standardizing interactions between applications and AI models.
 It acts as a universal bridge to models available on OpenRouter, handling chat and document requests without requiring specific integrations for each model.
@@ -10,8 +10,8 @@ For real use, this file should be **replaced or extended** with a **custom MCP s
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/mcp-api.git
-cd mcp-api
+git clone https://github.com/Mo0xy/MCP-Router.git
+cd MCP-Router
 ```
 
 ### 2. Environment setup
