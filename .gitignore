@@ -25,6 +25,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+test_model.py
+test_ssl.py
+debug_mcp_modules.py
 
 # Virtual environments
 .venv/
