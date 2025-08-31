@@ -29,7 +29,7 @@ MCP si basa su due componenti principali:
 * **MCP Server**: È un'interfaccia specializzata che incapsula l'accesso a un servizio esterno (es. GitHub), esponendo un insieme standardizzato di strumenti e risorse utilizzabili dal LLM.
 ---
 
-![alt text](image-4.png)
+![alt text](image_4.png)
 
 ---
 
@@ -41,8 +41,8 @@ Un aspetto fondamentale di MCP è la sua **indipendenza dal trasporto** (“tran
 * **Altri protocolli di rete**
 
 <div style="display: flex; align-items: center; gap: 16px;">
-   <img src="image-2.png" alt="alt text" style="max-width: 48%; height: auto;">
-   <img src="image-3.png" alt="alt text" style="max-width: 48%; height: auto;">
+   <img src="image_2.png" alt="alt text" style="max-width: 48%; height: auto;">
+   <img src="image_3.png" alt="alt text" style="max-width: 48%; height: auto;">
 </div>
 
 ## **Tipi di messaggi**
@@ -52,7 +52,7 @@ Il protocollo MCP definisce una serie di messaggi che regolano la comunicazione 
 * `ListToolsRequest` / `ListToolsResult`: Permette al client di ottenere la lista degli strumenti disponibili presso un dato MCP Server.
 * `CallToolRequest` / `CallToolResult`: Permette di invocare uno specifico strumento ed ottenere il risultato dell’esecuzione.
 
-![alt text](image-1.png)
+![alt text](image_1.png)
 
 ## **Flusso operativo completo: dal LLM al servizio esterno**
 
