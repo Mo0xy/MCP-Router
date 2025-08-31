@@ -22,8 +22,7 @@ def generate_text(prompt: str = Query(..., description="Prompt text")):
     try:
         logger.info(f"Received prompt: {prompt[:100]}...")
         
-        # Use the thread-safe version
-        response = run_mcp(prompt)  # This now uses run_mcp_in_new_thread internally
+        response = run_mcp(prompt)
         
         logger.info(f"Response generated successfully")
         return {"response": response}
@@ -32,7 +31,6 @@ def generate_text(prompt: str = Query(..., description="Prompt text")):
         logger.error(f"Error in chat endpoint: {e}")
         logger.error(traceback.format_exc())
         
-        # Return an HTTP error instead of crashing the API
         raise HTTPException(
             status_code=500, 
             detail=f"Error during processing: {str(e)}"

@@ -1,4 +1,3 @@
-# mcp_run.py
 import os
 import sys
 import asyncio
@@ -93,7 +92,7 @@ def run_mcp_in_new_thread(prompt: str) -> str:
 
     with ThreadPoolExecutor(max_workers=1) as executor:
         future = executor.submit(thread_target)
-        return future.result(timeout=60)  # 60 seconds timeout
+        return future.result(timeout=60)
 
 # SOLUTION 2: Async version for FastAPI with correct loop handling
 async def run_mcp_async_for_fastapi(prompt: str) -> str:

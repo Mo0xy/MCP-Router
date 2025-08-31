@@ -1,20 +1,27 @@
-# MCP API Project
+# MCP-Router
 
-MCP API Project è un’API FastAPI che implementa il Model Context Protocol (MCP), standardizzando le interazioni tra applicazioni e modelli AI.
+MCP-Router è un’API FastAPI che implementa il Model Context Protocol (MCP), standardizzando le interazioni tra applicazioni e modelli AI.
 Funziona come un ponte universale verso i modelli disponibili su OpenRouter, gestendo richieste di chat e documenti senza richiedere integrazioni specifiche per ciascun modello.
+
 ⚠️ **Nota importante**: il file `mcp_server.py` incluso nel progetto è fornito **solo come esempio/test**.
 In un utilizzo reale, questo file dovrebbe essere **sostituito o esteso** con un **server MCP personalizzato**, in base alle proprie esigenze e logica applicativa.
 
+---
+
 ## 🚀 Quick Start
 
-### 1. Clone del repository
+Esistono due modi principali per eseguire MCP-Router: **API Mode** e **CLI Mode**.
+
+---
+
+### 🔹 1. Clone del repository
 
 ```bash
-git clone https://github.com/tuo-username/mcp-api.git
-cd mcp-api
+git clone https://github.com/tuo-username/MCP-Router.git
+cd MCP-Router
 ```
 
-### 2. Configurazione ambiente
+### 🔹 2. Configurazione ambiente
 
 ```bash
 # Copia il file di esempio
@@ -25,31 +32,51 @@ cp .env.example .env
 # OPENROUTER_API_KEY=your_key_here
 ```
 
-### 3. Avvio con Docker
+---
+
+### 🔹 3A. Avvio in modalità API
 
 ```bash
 # Crea directory logs
 mkdir logs
 
-# Build e avvio
+# Avvio con Docker
 docker-compose up --build -d
 
 # Verifica che funzioni
 curl http://localhost:8000/health
 ```
 
+### 🔹 3B. Avvio in modalità CLI
+
+> Puoi eseguire MCP-Router direttamente senza usare Docker o FastAPI, tramite il CLI integrato.
+
+```bash
+uv run main.py
+```
+
+> In questa modalità tutte le funzionalità MCP sono accessibili direttamente dal terminale.
+
+---
+
 ## 📚 Endpoints API
+
+*(Solo per modalità API)*
 
 * **GET /** → Redirect a documentazione Swagger
 * **GET /health** → Health check
 * **POST /chat** → Chat con AI tramite MCP
 * **POST /chat\_alternative** → Endpoint alternativo
 
-### Esempio utilizzo:
+### Esempio utilizzo API:
 
 ```bash
 curl -X POST "http://localhost:8000/chat?prompt=Hello"
 ```
+
+> Per la modalità CLI (`uv run main.py`), non sono necessari endpoint HTTP: tutte le funzionalità sono accessibili direttamente dal terminale.
+
+---
 
 ## 🔧 Sviluppo Locale
 
@@ -63,16 +90,24 @@ source .venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 ```
 
-### Run locale
+### Run locale API
 
 ```bash
 uvicorn api.v1.mcpApi:app --reload
 ```
 
+### Run locale CLI
+
+```bash
+uv run main.py
+```
+
+---
+
 ## 📁 Struttura Progetto
 
 ```
-MCP_v2/
+MCP-Router/
 ├── api/v1/
 │   ├── mcpApi.py          # FastAPI app
 │   └── mcp_run.py         # MCP runner functions
@@ -82,23 +117,28 @@ MCP_v2/
 │   └── cli.py             # CLI interface
 ├── mcp_client.py          # MCP client
 ├── mcp_server.py          # ⚠️ MCP server di esempio/test → sostituire con uno personalizzato
-├── main.py                # CLI entry point
+├── main.py                # CLI entry point → eseguibile con `uv run main.py`
 ├── requirements.txt       # Dependencies
 ├── Dockerfile             # Production container
 ├── docker-compose.yml     # Container orchestration
 └── .env.example           # Environment template
 ```
 
+---
+
 ## 🔄 Personalizzazione del Server MCP
 
 Il file `mcp_server.py` incluso è pensato solo come **base di riferimento**.
 Per un utilizzo reale, è necessario implementare un server MCP personalizzato che gestisca le tue logiche, risorse e interazioni.
+
 Puoi:
 
 * Modificare direttamente `mcp_server.py`
 * Oppure creare un nuovo modulo/server e sostituirlo al file di esempio
 
-In questo modo l’API potrà interfacciarsi con la tua logica specifica.
+> ⚠️ Ricorda: se non vuoi usare l’API, puoi sempre eseguire `uv run main.py` in modalità CLI per sfruttare le funzionalità MCP senza server.
+
+---
 
 ## 🛠️ Troubleshooting
 
@@ -121,6 +161,8 @@ curl http://localhost:8000/health
 # Verifica logs applicazione
 cat logs/error_log.txt
 ```
+
+---
 
 ## 🤝 Contributing
 

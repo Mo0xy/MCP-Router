@@ -34,7 +34,6 @@ class MCPClient:
         stdio_transport = await self._exit_stack.enter_async_context(
             stdio_client(server_params)
         )
-        # CORREZIONE: sintassi corretta per lo spacchettamento
         stdio_read, stdio_write = stdio_transport
         self._session = await self._exit_stack.enter_async_context(
             ClientSession(stdio_read, stdio_write)
@@ -71,19 +70,15 @@ class MCPClient:
         print(Fore.CYAN + "\n Resource:", resource)
 
         if isinstance(resource, types.TextResourceContents):
-            # Caso JSON
             if resource.mimeType == "application/json":
                 print(Fore.CYAN + "\n JSON Resource:", json.loads(resource.text))
                 return json.loads(resource.text)
             
-            # Caso testo semplice
             try:
-                # Se per caso è un JSON valido ma senza mimeType
                 parsed = json.loads(resource.text)
                 print(Fore.CYAN + "\n Parsed as JSON (fallback):", parsed)
                 return parsed
             except json.JSONDecodeError:
-                # Altrimenti è testo normale
                 print(Fore.CYAN + "\n Text Resource:", resource.text)
                 return resource.text
 
@@ -91,10 +86,10 @@ class MCPClient:
     async def cleanup(self):
         self._session = None
         
-        # Chiudi l'exit stack che gestisce tutti i context manager
+        # Close the exit stack that manages all context managers
         await self._exit_stack.aclose()
         
-        # Su Windows, aspetta che i subprocess si chiudano completamente
+        # On Windows, wait for subprocesses to fully close
         if sys.platform == "win32":
             await asyncio.sleep(0.3)
 
@@ -122,20 +117,19 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\nInterrotto dall'utente")
+        print("\nInterrrupted by user")
     finally:
-        # Forza la chiusura di eventuali task pending
+        # Force close any pending tasks
         try:
             loop = asyncio.get_running_loop()
         except RuntimeError:
-            # Nessun loop attivo, tutto ok
+            # No active loop, all good
             pass
         else:
-            # Se c'è ancora un loop, cancella i task pending
+            # If there is still a loop, cancel pending tasks
             pending = asyncio.all_tasks(loop)
             for task in pending:
                 task.cancel()
             
-            # Aspetta un momento per la pulizia
             if pending:
                 loop.run_until_complete(asyncio.sleep(0.1))

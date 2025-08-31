@@ -3,9 +3,7 @@ import sys
 import os
 from dotenv import load_dotenv
 from contextlib import AsyncExitStack
-
 from mcp_client import MCPClient
-
 from core.cli_chat import CliChat
 from core.cli import CliApp
 from core.openrouter import OpenRouterClient
