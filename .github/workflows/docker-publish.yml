@@ -10,7 +10,7 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: Mo0xy/MCP-Router
+  IMAGE_NAME: alessandroferrulli/mcp-router
 
 jobs:
   build-and-push:
