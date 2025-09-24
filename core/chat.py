@@ -4,7 +4,7 @@ from core.openrouter import OpenRouterClient, OpenRouterMessage
 from mcp_client import MCPClient
 from core.tools import ToolManager  # Usa il nostro tool manager semplificato
 from anthropic.types import MessageParam
-from colorama import Fore, Style, init
+from colorama import Fore, init
 
 init(autoreset=True)
 
