@@ -27,10 +27,11 @@ class OpenRouterClient:
     Client per OpenRouter che mantiene la compatibilità con l'interfaccia Claude
     """
     
-    def __init__(self, model: str, api_key: Optional[str] = None):
+    def __init__(self, model: str, api_key: Optional[str] = None, default_timeout: float = 120.0):
         self.model = model
         self.api_key = api_key or os.getenv("OPENROUTER_API_KEY")
         self.base_url = "https://openrouter.ai/api/v1"
+        self.default_timeout = default_timeout
         
         if not self.api_key:
             raise ValueError("OpenRouter API key is required. Set OPENROUTER_API_KEY environment variable or pass it directly.")
@@ -110,6 +111,48 @@ class OpenRouterClient:
         
         return openrouter_messages
 
+    async def chat_with_retry(
+        self,
+        messages: List[Dict],
+        system: Optional[str] = None,
+        temperature: float = 0.4,
+        stop_sequences: List[str] = None,
+        tools: Optional[List[Dict]] = None,
+        thinking: bool = False,
+        thinking_budget: int = 400,
+        max_tokens: int = 500,
+        max_retries: int = 3,
+        base_delay: float = 2.0
+    ) -> OpenRouterMessage:
+        """
+        Versione con retry del metodo chat
+        """
+        for attempt in range(max_retries):
+            try:
+                return await self.chat(
+                    messages=messages,
+                    system=system,
+                    temperature=temperature,
+                    stop_sequences=stop_sequences,
+                    tools=tools,
+                    thinking=thinking,
+                    thinking_budget=thinking_budget,
+                    max_tokens=max_tokens,
+                    timeout_override=self.default_timeout + (attempt * 30)  # Incrementa timeout ad ogni retry
+                )
+            except Exception as e:
+                error_msg = str(e).lower()
+                is_retriable = any(keyword in error_msg for keyword in ['timeout', 'connection', 'network'])
+                
+                if is_retriable and attempt < max_retries - 1:
+                    wait_time = base_delay * (2 ** attempt)  # Exponential backoff
+                    print(f"Timeout/Network error (attempt {attempt + 1}/{max_retries}), retrying in {wait_time}s...")
+                    await asyncio.sleep(wait_time)
+                    continue
+                else:
+                    # Re-raise l'eccezione originale se non è retriable o se abbiamo esaurito i retry
+                    raise
+
     async def chat(
         self,
         messages: List[Dict],
@@ -119,7 +162,8 @@ class OpenRouterClient:
         tools: Optional[List[Dict]] = None,
         thinking: bool = False,
         thinking_budget: int = 400,
-        max_tokens: int = 500
+        max_tokens: int = 500,
+        timeout_override: Optional[float] = None
     ) -> OpenRouterMessage:
         """
         Effettua una richiesta chat a OpenRouter
@@ -133,10 +177,13 @@ class OpenRouterClient:
             thinking: Flag per il thinking (ignorato, non supportato da OpenRouter)
             thinking_budget: Budget per il thinking (ignorato)
             max_tokens: Numero massimo di token da generare
+            timeout_override: Override del timeout default
         
         Returns:
             OpenRouterMessage: Messaggio di risposta
         """
+        timeout = timeout_override or self.default_timeout
+        
         try:
             # Converte i messaggi nel formato OpenRouter
             openrouter_messages = self._convert_messages_to_openrouter_format(messages)
@@ -163,9 +210,16 @@ class OpenRouterClient:
             # Aggiunge tools se supportati (function calling)
             if tools:
                 payload["tools"] = self._convert_tools_to_openrouter_format(tools)
+                # Aumenta timeout quando ci sono tools
+                timeout = max(timeout, 150.0)
+            
+            print(f"Making request with timeout: {timeout}s")
             
             # Effettua la richiesta
-            async with httpx.AsyncClient(verify=False, timeout=60.0) as client:
+            async with httpx.AsyncClient(
+                verify=False, 
+                timeout=httpx.Timeout(timeout, connect=30.0, read=timeout, write=30.0)
+            ) as client:
                 response = await client.post(
                     f"{self.base_url}/chat/completions",
                     headers=self.headers,
@@ -221,11 +275,16 @@ class OpenRouterClient:
             )
             
         except httpx.TimeoutException as e:
-            raise Exception(f"Request timeout: {e}")
+            raise Exception(f"Request timeout after {timeout}s: {e}")
         except httpx.ConnectError as e:
             raise Exception(f"Connection error: {e}")
         except httpx.HTTPStatusError as e:
-            raise Exception(f"HTTP error {e.response.status_code}: {e.response.text}")
+            error_text = ""
+            try:
+                error_text = e.response.text
+            except:
+                pass
+            raise Exception(f"HTTP error {e.response.status_code}: {error_text}")
         except json.JSONDecodeError as e:
             raise Exception(f"JSON decode error: {e}")
         except Exception as e:
@@ -257,102 +316,20 @@ class OpenRouterClient:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
         
-        return loop.run_until_complete(self.chat(*args, **kwargs))
+        return loop.run_until_complete(self.chat_with_retry(*args, **kwargs))
 
-
-# Esempio di utilizzo
-async def example_usage_async():
-    """Esempio di utilizzo asincrono della classe OpenRouterClient"""
-    
-    # Inizializza il client (assicurati di avere OPENROUTER_API_KEY nell'ambiente)
-    client = OpenRouterClient(model="mistralai/mistral-7b-instruct")
-    
-    # Crea una lista di messaggi
-    messages = []
-    
-    # Aggiungi un messaggio utente
-    client.add_user_message(messages, "Ciao!")
-    
+async def warmup_model(client: OpenRouterClient):
+    """
+    Esegue una mini chat per scaldare il modello.
+    """
     try:
-        # Effettua la richiesta
-        response = await client.chat(
+        print("Starting warm-up...")
+        messages = [{"role": "user", "content": "warm up"}]
+        await client.chat(
             messages=messages,
-            temperature=0.4,
-            max_tokens=150
+            temperature=0.0,
+            max_tokens=1
         )
-        
-        # Estrai e stampa la risposta
-        response_text = client.text_from_message(response)
-        print(f"Risposta: {response_text}")
-        
-        # Aggiungi la risposta ai messaggi per continuare la conversazione
-        client.add_assistant_message(messages, response)
-        
-        # Aggiungi un altro messaggio utente
-        client.add_user_message(messages, "Puoi dirmi qualcosa di interessante?")
-        
-        # Nuova richiesta
-        response2 = await client.chat(
-            messages=messages,
-            temperature=0.4,
-            max_tokens=200
-        )
-        
-        response2_text = client.text_from_message(response2)
-        print(f"Risposta 2: {response2_text}")
-        
+        print("✅ Warm-up completed")
     except Exception as e:
-        print(f"Errore: {e}")
-
-
-def example_usage_sync():
-    """Esempio di utilizzo sincrono della classe OpenRouterClient"""
-    
-    # Inizializza il client (assicurati di avere OPENROUTER_API_KEY nell'ambiente)
-    client = OpenRouterClient(model="mistralai/mistral-7b-instruct")
-    
-    # Crea una lista di messaggi
-    messages = []
-    
-    # Aggiungi un messaggio utente
-    client.add_user_message(messages, "Ciao! Come stai?")
-    
-    try:
-        # Effettua la richiesta usando il wrapper sincrono
-        response = client.chat_sync(
-            messages=messages,
-            temperature=0.4,
-            max_tokens=150
-        )
-        
-        # Estrai e stampa la risposta
-        response_text = client.text_from_message(response)
-        print(f"Risposta: {response_text}")
-        
-        # Aggiungi la risposta ai messaggi per continuare la conversazione
-        client.add_assistant_message(messages, response)
-        
-        # Aggiungi un altro messaggio utente
-        client.add_user_message(messages, "Puoi dirmi qualcosa di interessante?")
-        
-        # Nuova richiesta
-        response2 = client.chat_sync(
-            messages=messages,
-            temperature=0.4,
-            max_tokens=200
-        )
-        
-        response2_text = client.text_from_message(response2)
-        print(f"Risposta 2: {response2_text}")
-        
-    except Exception as e:
-        print(f"Errore: {e}")
-
-
-if __name__ == "__main__":
-    # Usa la versione asincrona
-    print("=== Esempio Asincrono ===")
-    asyncio.run(example_usage_async())
-    
-    # print("\n=== Esempio Sincrono ===")
-    # example_usage_sync()
+        print(f"⚠️ Warm-up failed: {e}")
