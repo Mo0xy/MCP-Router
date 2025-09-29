@@ -65,7 +65,7 @@ async def main():
     openrouter_client = OpenRouterClient(
         model=model, 
         api_key=api_key,
-        default_timeout=120.0  # Timeout più lungo
+        default_timeout=120.0
     )
     
     await warmup_model(openrouter_client)
@@ -76,13 +76,14 @@ async def main():
     try:
         # Document client
         print(f"{Fore.CYAN}Initializing document MCP client...")
-        doc_client = MCPClient(
+        hr_client = MCPClient(
             command="uv",
-            args=["run", "mcp_server.py"]
+            args=["run", "mcp_server.py"],
+            openrouter_client=openrouter_client
         )
-        await doc_client.connect()
-        clients["documents"] = doc_client
-        print(f"{Fore.GREEN}✓ Document client connected")
+        await hr_client.connect()
+        clients["human_resources"] = hr_client
+        print(f"{Fore.GREEN}✓ Human Resources client connected")
         
         # Test system health
         if await test_system_health(clients, openrouter_client):
@@ -92,7 +93,7 @@ async def main():
         
         # Initialize CLI chat
         cli_chat = CliChat(
-            doc_client=doc_client,
+            mcp_client=hr_client,
             clients=clients,
             openRouterService=openrouter_client
         )
