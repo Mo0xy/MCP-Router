@@ -8,23 +8,23 @@ from dataclasses import dataclass
 
 @dataclass
 class OpenRouterMessage:
-    """Struttura per rappresentare un messaggio compatibile con l'interfaccia Claude"""
+    """Structure to represent a message compatible with the Claude interface"""
     content: List[Dict[str, Any]]
     stop_reason: Optional[str] = None
 
     def __post_init__(self):
-        # Assicurati che content sia sempre una lista
+        # Ensure content is always a list
         if isinstance(self.content, str):
             self.content = [{"type": "text", "text": self.content}]
         elif isinstance(self.content, list) and len(self.content) > 0:
-            # Se il primo elemento è una stringa, convertilo nel formato corretto
+            # If the first element is a string, convert it to the correct format
             if isinstance(self.content[0], str):
                 self.content = [{"type": "text", "text": self.content[0]}]
 
 
 class OpenRouterClient:
     """
-    Client per OpenRouter che mantiene la compatibilità con l'interfaccia Claude
+    OpenRouter client that maintains compatibility with the Claude interface
     """
     
     def __init__(self, model: str, api_key: Optional[str] = None, default_timeout: float = 120.0):
@@ -42,9 +42,9 @@ class OpenRouterClient:
         }
 
     def add_user_message(self, messages: List[Dict], message: Union[str, OpenRouterMessage, Dict]):
-        """Aggiunge un messaggio utente alla lista dei messaggi"""
+        """Adds a user message to the list of messages"""
         if isinstance(message, OpenRouterMessage):
-            # Estrai il testo dal messaggio OpenRouter
+            # Extract text from the OpenRouter message
             content = self._extract_text_from_content(message.content)
         elif isinstance(message, dict):
             content = message.get("content", "")
@@ -60,7 +60,7 @@ class OpenRouterClient:
         messages.append(user_message)
 
     def add_assistant_message(self, messages: List[Dict], message: Union[str, OpenRouterMessage, Dict]):
-        """Aggiunge un messaggio assistant alla lista dei messaggi"""
+        """Adds an assistant message to the list of messages"""
         if isinstance(message, OpenRouterMessage):
             content = self._extract_text_from_content(message.content)
         elif isinstance(message, dict):
@@ -77,11 +77,11 @@ class OpenRouterClient:
         messages.append(assistant_message)
 
     def text_from_message(self, message: OpenRouterMessage) -> str:
-        """Estrae il testo da un messaggio OpenRouter"""
+        """Extracts text from an OpenRouter message"""
         return self._extract_text_from_content(message.content)
 
     def _extract_text_from_content(self, content: List[Dict[str, Any]]) -> str:
-        """Estrae il testo da una lista di blocchi di contenuto"""
+        """Extracts text from a list of content blocks"""
         text_blocks = []
         for block in content:
             if isinstance(block, dict) and block.get("type") == "text":
@@ -93,14 +93,14 @@ class OpenRouterClient:
         return "\n".join(text_blocks)
 
     def _convert_messages_to_openrouter_format(self, messages: List[Dict]) -> List[Dict]:
-        """Converte i messaggi nel formato OpenRouter"""
+        """Converts messages to OpenRouter format"""
         openrouter_messages = []
         
         for msg in messages:
             role = msg.get("role", "user")
             content = msg.get("content", "")
             
-            # Se il contenuto è una lista di blocchi (formato Claude), estrailo
+            # If the content is a list of blocks (Claude format), extract it
             if isinstance(content, list):
                 content = self._extract_text_from_content(content)
             
@@ -125,7 +125,7 @@ class OpenRouterClient:
         base_delay: float = 2.0
     ) -> OpenRouterMessage:
         """
-        Versione con retry del metodo chat
+        Retry version of the chat method
         """
         for attempt in range(max_retries):
             try:
@@ -138,7 +138,7 @@ class OpenRouterClient:
                     thinking=thinking,
                     thinking_budget=thinking_budget,
                     max_tokens=max_tokens,
-                    timeout_override=self.default_timeout + (attempt * 30)  # Incrementa timeout ad ogni retry
+                    timeout_override=self.default_timeout + (attempt * 30)  # Increase timeout on each retry
                 )
             except Exception as e:
                 error_msg = str(e).lower()
@@ -150,7 +150,7 @@ class OpenRouterClient:
                     await asyncio.sleep(wait_time)
                     continue
                 else:
-                    # Re-raise l'eccezione originale se non è retriable o se abbiamo esaurito i retry
+                    # Re-raise the original exception if not retriable or retries are exhausted
                     raise
 
     async def chat(
@@ -166,36 +166,36 @@ class OpenRouterClient:
         timeout_override: Optional[float] = None
     ) -> OpenRouterMessage:
         """
-        Effettua una richiesta chat a OpenRouter
+        Makes a chat request to OpenRouter
         
         Args:
-            messages: Lista di messaggi nel formato Claude
-            system: Messaggio di sistema (opzionale)
-            temperature: Temperatura per la generazione (0.0-2.0)
-            stop_sequences: Sequenze di stop (non sempre supportate)
-            tools: Strumenti disponibili (convertiti in function calling se supportato)
-            thinking: Flag per il thinking (ignorato, non supportato da OpenRouter)
-            thinking_budget: Budget per il thinking (ignorato)
-            max_tokens: Numero massimo di token da generare
-            timeout_override: Override del timeout default
+            messages: List of messages in Claude format
+            system: System message (optional)
+            temperature: Generation temperature (0.0-2.0)
+            stop_sequences: Stop sequences (not always supported)
+            tools: Available tools (converted to function calling if supported)
+            thinking: Thinking flag (ignored, not supported by OpenRouter)
+            thinking_budget: Thinking budget (ignored)
+            max_tokens: Maximum number of tokens to generate
+            timeout_override: Override the default timeout
         
         Returns:
-            OpenRouterMessage: Messaggio di risposta
+            OpenRouterMessage: Response message
         """
         timeout = timeout_override or self.default_timeout
         
         try:
-            # Converte i messaggi nel formato OpenRouter
+            # Convert messages to OpenRouter format
             openrouter_messages = self._convert_messages_to_openrouter_format(messages)
             
-            # Aggiunge il messaggio di sistema se presente
+            # Add system message if present
             if system:
                 openrouter_messages.insert(0, {
                     "role": "system",
                     "content": system
                 })
             
-            # Prepara il payload per OpenRouter
+            # Prepare payload for OpenRouter
             payload = {
                 "model": self.model,
                 "messages": openrouter_messages,
@@ -203,19 +203,19 @@ class OpenRouterClient:
                 "max_tokens": max_tokens,
             }
             
-            # Aggiunge stop sequences se supportate
+            # Add stop sequences if supported
             if stop_sequences:
                 payload["stop"] = stop_sequences
             
-            # Aggiunge tools se supportati (function calling)
+            # Add tools if supported (function calling)
             if tools:
                 payload["tools"] = self._convert_tools_to_openrouter_format(tools)
-                # Aumenta timeout quando ci sono tools
+                # Increase timeout when tools are present
                 timeout = max(timeout, 150.0)
             
             print(f"Making request with timeout: {timeout}s")
             
-            # Effettua la richiesta
+            # Make the request
             async with httpx.AsyncClient(
                 verify=False, 
                 timeout=httpx.Timeout(timeout, connect=30.0, read=timeout, write=30.0)
@@ -228,7 +228,7 @@ class OpenRouterClient:
             
             response.raise_for_status()
             
-            # Processa la risposta
+            # Process the response
             response_data = response.json()
             
             if "choices" not in response_data or not response_data["choices"]:
@@ -238,7 +238,7 @@ class OpenRouterClient:
             message_content = choice.get("message", {}).get("content", "")
             finish_reason = choice.get("finish_reason", "stop")
             
-            # Mappa il finish_reason al formato Claude
+            # Map finish_reason to Claude format
             stop_reason_mapping = {
                 "stop": "end_turn",
                 "length": "max_tokens",
@@ -248,16 +248,16 @@ class OpenRouterClient:
             
             stop_reason = stop_reason_mapping.get(finish_reason, finish_reason)
             
-            # Gestisce tool calls se presenti
+            # Handle tool calls if present
             if "tool_calls" in choice.get("message", {}):
                 tool_calls = choice["message"]["tool_calls"]
                 content = []
                 
-                # Aggiunge il testo se presente
+                # Add text if present
                 if message_content:
                     content.append({"type": "text", "text": message_content})
                 
-                # Aggiunge i tool calls
+                # Add tool calls
                 for tool_call in tool_calls:
                     content.append({
                         "type": "tool_use",
@@ -268,7 +268,7 @@ class OpenRouterClient:
                 
                 return OpenRouterMessage(content=content, stop_reason=stop_reason)
             
-            # Risposta normale
+            # Normal response
             return OpenRouterMessage(
                 content=[{"type": "text", "text": message_content}],
                 stop_reason=stop_reason
@@ -291,7 +291,7 @@ class OpenRouterClient:
             raise Exception(f"OpenRouter API error: {e}")
 
     def _convert_tools_to_openrouter_format(self, tools: List[Dict]) -> List[Dict]:
-        """Converte i tools dal formato Claude al formato OpenRouter"""
+        """Converts tools from Claude format to OpenRouter format"""
         openrouter_tools = []
         
         for tool in tools:
@@ -307,9 +307,9 @@ class OpenRouterClient:
         
         return openrouter_tools
 
-    # Metodi sincroni wrapper per compatibilità con codice esistente
+    # Synchronous wrapper methods for compatibility with existing code
     def chat_sync(self, *args, **kwargs) -> OpenRouterMessage:
-        """Wrapper sincrono per il metodo chat asincrono"""
+        """Synchronous wrapper for the async chat method"""
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError:
@@ -320,7 +320,7 @@ class OpenRouterClient:
 
 async def warmup_model(client: OpenRouterClient):
     """
-    Esegue una mini chat per scaldare il modello.
+    Performs a mini chat to warm up the model.
     """
     try:
         print("Starting warm-up...")

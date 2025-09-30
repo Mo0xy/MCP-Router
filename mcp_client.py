@@ -6,9 +6,17 @@ from typing import Optional, Any
 from contextlib import AsyncExitStack
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
+from mcp.client.session import RequestContext
+from mcp.types import (
+    CreateMessageRequestParams,
+    CreateMessageResult,
+    TextContent,
+    Role
+)
 import json
 from pydantic import AnyUrl
 from colorama import Fore, Style, init
+from core.openrouter import OpenRouterClient
 
 init(autoreset=True)
 
@@ -18,11 +26,14 @@ class MCPClient:
         command: str,
         args: list[str],
         env: Optional[dict] = None,
+        openrouter_client: Optional[OpenRouterClient] = None
     ):
         self._command = command
         self._args = args
         self._env = env
         self._session: Optional[ClientSession] = None
+        self._openrouter_client = openrouter_client
+
         self._exit_stack: AsyncExitStack = AsyncExitStack()
 
     async def connect(self):
@@ -36,9 +47,82 @@ class MCPClient:
         )
         stdio_read, stdio_write = stdio_transport
         self._session = await self._exit_stack.enter_async_context(
-            ClientSession(stdio_read, stdio_write)
+            ClientSession(stdio_read, stdio_write, sampling_callback=self._sampling_callback)
         )
         await self._session.initialize()
+        
+    async def _sampling_callback(
+        self, 
+        context: RequestContext, 
+        params: CreateMessageRequestParams
+    ) -> CreateMessageResult:
+        """
+        Callback that handles sampling requests from the MCP server.
+        Uses OpenRouter to call the AI model.
+        """
+        try:
+            print(f"{Fore.YELLOW}🔄 Sampling request received...")
+            
+            # print("params", params)
+            messages = []
+            for msg in params.messages:
+                # msg is a SamplingMessage with attributes: role, content
+                role = msg.role  # 'user' or 'assistant'
+                
+                if hasattr(msg.content, 'text'):
+                    text = msg.content.text
+                else:
+                    text = str(msg.content)
+                
+                messages.append({
+                    "role": role,
+                    "content": text
+                })
+            
+            # print("\nextracted messages:", messages)
+            print("calling OpenRouter for sampling...")
+            response = await self._openrouter_client.chat(
+                messages=messages,
+                system=params.systemPrompt,
+                temperature=getattr(params, 'temperature', 0.7),
+                max_tokens=getattr(params, 'maxTokens', 1000)
+            )
+            
+            print("extracting text from response...")
+            
+            # Extracts the text from the response
+            response_text = self._openrouter_client.text_from_message(response)
+            
+            print("\nresponse text:", response_text)
+            
+            print(f"{Fore.GREEN}✅ Sampling completed")
+            
+            # Returns the result in MCP format
+            
+            msg_result = CreateMessageResult(
+                role="assistant",
+                model=self._openrouter_client.model,
+                content=TextContent(
+                    type="text",
+                    text=response_text
+                )
+            )
+
+            print(f"msg_result: {msg_result}")
+
+            return msg_result
+            
+        except Exception as e:
+            print(f"{Fore.RED}❌ Error during sampling: {e}")
+            return CreateMessageResult(
+                role="assistant",
+                model=self._openrouter_client.model,
+                content=TextContent(
+                    type="text",
+                    text=f"Error during generation: {str(e)}"
+                )
+            )
+
 
     def session(self) -> ClientSession:
         if self._session is None:
@@ -59,6 +143,10 @@ class MCPClient:
     async def list_prompts(self) -> list[types.Prompt]:
         result = await self.session().list_prompts()
         return result.prompts
+    
+    async def list_resources(self) -> list[dict]:
+        result = await self.session().list_resources()
+        return [res.model_dump() for res in result.resources]
 
     async def get_prompt(self, prompt_name, args: dict[str, str]):
         result = await self.session().get_prompt(prompt_name, args)
@@ -117,7 +205,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\nInterrrupted by user")
+        print("\nInterrupted by user")
     finally:
         # Force close any pending tasks
         try:
