@@ -1,6 +1,7 @@
+import os
+from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import RealDictCursor
-
 
 class Candidate:
     id: str
@@ -40,32 +41,48 @@ def get_user_data_by_email(email: str) -> dict:
         return {}
     return result
 
-
+def get_db_connection():
+    """
+    Restituisce una connessione al DB, automaticamente usando host corretto
+    a seconda che il codice giri in Docker o in locale.
+    """
+    load_dotenv()
+    if os.getenv("DOCKER", "0") == "1":
+        print("Connecting to DB in Docker mode")
+        return psycopg2.connect(
+            dbname=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASS"),
+            host=os.getenv("DB_HOST_DOCKER"),
+            port=os.getenv("DB_PORT")
+        )
+    return psycopg2.connect(
+        dbname=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASS"),
+        host=os.getenv("DB_HOST"),
+        port=os.getenv("DB_PORT")
+    )
 
 def execute_query(query: str, params: tuple = ()):
     try:
-        conn = psycopg2.connect(
-            dbname="hrrecruit",
-            user="postgres",
-            password="postgres",
-            host="localhost",
-            port="5432"
-        )
+        conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute(query, params)
-        
+
         if query.strip().lower().startswith("select"):
             result = cur.fetchone()
         else:
             conn.commit()
             result = cur.rowcount
-        
+
         cur.close()
         conn.close()
         return result
     except Exception as e:
         print(f"Errore: {e}")
         return None
+
     
     
 
@@ -98,4 +115,6 @@ if __name__ == "__main__":
     # if candidate_data:
     #     candidate_id, name, email, phone, skills = candidate_data[0]
     #     print(name)  # Prints the name of the candidate with ID 1
-    print("\n", get_user_data_by_email("mario.rossi@example.com"))
+    # print("\n", get_user_data_by_email("mario.rossi@example.com"))
+    load_dotenv()
+    print(os.getenv("DB_HOST", "localhost"))

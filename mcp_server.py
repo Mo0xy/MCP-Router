@@ -1,6 +1,10 @@
 import asyncio
 import logging
+import os
+import sys
+import anyio
 from colorama import Fore
+from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP, Context
 from mcp.types import SamplingMessage, TextContent
 from dbAccess import get_user_data_by_email
@@ -8,6 +12,12 @@ from core.openrouter import OpenRouterClient
 from psycopg2.extras import RealDictRow
 
 # Configure logging for diagnostics
+# Configuro un logger che scrive su file (NON su stdout/stderr)
+# logging.basicConfig(
+#     filename="/app/server.log",
+#     level=logging.DEBUG,
+#     format="%(asctime)s [%(levelname)s] %(message)s",
+# )
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 server = FastMCP("InterviewBot", log_level="INFO")
@@ -47,12 +57,20 @@ async def generate_interview_questions(email: str, context: Context, num_questio
     row = get_user_data_by_email(email)
     
     try:
+        print("\n === Getting data from db...\n")
         semantic_profile = row['semantic_profile']
         job_description = row['jobdescription']
         name = row['name']
         surname = row['surname']
         skills_text = safe_extract(semantic_profile, "semantic_profile")
         job_description = safe_extract(job_description, "jobdescription")
+    
+    except Exception as e:
+        print(f"Error extracting user data: {e}")
+        
+        return f"Error extracting user data: {e}"
+    
+    try:
 
         prompt = f"""
 You are an expert recruiter.
@@ -91,7 +109,9 @@ Each question must be personalized to the candidate’s profile and role, and in
         print(f"\n{Fore.RED}Sampling result:", result.content)
         
         if result.content.type == "text":
-            return result.content.text
+            if result.content.text:
+                return result.content.text
+            return "No text content available"
         else:
             raise ValueError("Sampling failed")
 
@@ -101,4 +121,17 @@ Each question must be personalized to the candidate’s profile and role, and in
         return f"Error during question generation: {str(e)}"
 
 if __name__ == "__main__":
-    asyncio.run(server.run())
+    
+    try:
+        # MCP usa stdio, quindi avvio direttamente in modalità stdio
+        load_dotenv()
+        if os.getenv("DOCKER", "0") == "1":
+            print("Running in Docker mode")
+            anyio.run(server.run_stdio_async)
+        else:
+            print("Running in local mode")
+            asyncio.run(server.run())
+    except Exception as e:
+        # Loggo l'errore su file, non su stdout
+        logging.error(f"Error running the server: {e}")
+        sys.exit(1)

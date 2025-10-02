@@ -8,7 +8,9 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 import logging
 
+from pydantic_settings import CliApp
 from mcp_client import MCPClient
+from core.cli import CliApp
 from core.cli_chat import CliChat
 from core.openrouter import OpenRouterClient
 
@@ -29,18 +31,19 @@ def init_env():
 # original async version
 async def run_mcp_async(prompt: str) -> str:
     model, _ = init_env()
-    openrouter_service = OpenRouterClient(model=model)
+    openrouter_service = OpenRouterClient(model=model,
+                                          api_key=_,
+                                          default_timeout=120.0)
+    clients = {}
 
     command, args = (
         ("uv", ["run", "mcp_server.py"])
-        if os.getenv("USE_UV", "0") == "1"
-        else ("python", ["mcp_server.py"])
     )
 
     async with AsyncExitStack() as stack:
         try:
-            doc_client = await stack.enter_async_context(
-                MCPClient(command=command, args=args)
+            hr_client = await stack.enter_async_context(
+                MCPClient(command=command, args=args, openrouter_client=openrouter_service)
             )
         except Exception as e:
             logger.error(f"Exception occurred: {e}")
@@ -53,15 +56,15 @@ async def run_mcp_async(prompt: str) -> str:
             
             return str(e)
 
-        clients = {"doc_client": doc_client}
-
+        clients["hr_client"] = hr_client
         chat = CliChat(
-            doc_client=doc_client,
+            mcp_client=hr_client,
             clients=clients,
             openRouterService=openrouter_service,
         )
 
         response = await chat.run(prompt)
+        
         return response
 
 # SOLUTION 1: Run in a new loop in a separate thread

@@ -1,0 +1,12 @@
+Exception occurred in thread:
+Traceback (most recent call last):
+  File "C:\ProgettiExperis\MCP_v4\Mcp_BE\api\v1\mcp_run.py", line 85, in thread_target
+    return new_loop.run_until_complete(run_mcp_async(prompt))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ferulli\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\ProgettiExperis\MCP_v4\Mcp_BE\api\v1\mcp_run.py", line 60, in run_mcp_async
+    chat = CliChat(
+           ^^^^^^^^
+TypeError: CliChat.__init__() got an unexpected keyword argument 'hr_client'

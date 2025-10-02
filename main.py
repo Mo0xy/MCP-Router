@@ -74,8 +74,8 @@ async def main():
     clients = {}
     
     try:
-        # Document client
-        print(f"{Fore.CYAN}Initializing document MCP client...")
+        # MCP client
+        print(f"{Fore.CYAN}Initializing MCP client...")
         hr_client = MCPClient(
             command="uv",
             args=["run", "mcp_server.py"],
