@@ -10,16 +10,34 @@ class Candidate:
     skills: list[str]
 
 
-def get_candidate_skills_data(candidate_id: str):
+def get_candidate_data(candidate_id: str):
     "take from db the cv_filename of the candidate then call the api to get the semantic profile of the cv"
-    query = "SELECT semantic_profile FROM candidate_applications_view WHERE candidate_id = %s"
-    result = execute_query(query, (candidate_id,))
+    query = "SELECT name, surname FROM candidate_applications_view WHERE candidate_id = %s"
+    try:
+        result = execute_query(query, (candidate_id,))
+    except Exception as e:
+       print(f"Error fetching candidate skills data: {e}")
+       return {}
     return result
 
 def get_job_requirements(job_id: str):
     "take from db the job description"
     query = "SELECT jobdescription FROM candidate_applications_view WHERE job_id = %s"
-    result = execute_query(query, (job_id,))
+    try:
+        result = execute_query(query, (job_id,))
+    except Exception as e:
+       print(f"Error fetching job requirements: {e}")
+       return {}
+    return result
+
+def get_user_data_by_email(email: str) -> dict:
+    "get user data from db by email"
+    query = "SELECT name, surname, semantic_profile, jobdescription FROM candidate_applications_view WHERE email = %s"
+    try:
+        result = execute_query(query, (email,))
+    except Exception as e:
+        print(f"Error fetching user data: {e}")
+        return {}
     return result
 
 
@@ -72,14 +90,12 @@ def execute_query(query: str, params: tuple = ()):
 
 
 if __name__ == "__main__":
-    candidate_data = get_candidate_skills_data("C01")
-    job_data = get_job_requirements("J001")
+    # candidate_data = get_candidate_skills_data("C01")
+    # job_data = get_job_requirements("J001")
     # print(candidate_data)
     # # Accessing attributes from the fetched data
     # # Assuming the query returns: [(id, name, email, phone, skills), ...]
     # if candidate_data:
     #     candidate_id, name, email, phone, skills = candidate_data[0]
     #     print(name)  # Prints the name of the candidate with ID 1
-    print("\n", candidate_data)
-    
-    print("\n", job_data)
+    print("\n", get_user_data_by_email("mario.rossi@example.com"))

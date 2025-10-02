@@ -26,14 +26,6 @@ class CliChat(Chat):
         except Exception as e:
             print(f"{Fore.RED}Error listing prompts: {e}")
             return []
-
-    async def list_docs_ids(self) -> list[str]:
-        """List available document IDs"""
-        try:
-            return await self.mcp_client.read_resource("docs://documents")
-        except Exception as e:
-            print(f"{Fore.RED}Error listing document IDs: {e}")
-            return []
         
     async def list_tools(self) -> list[str]:
         """List available tools from the document client"""
@@ -51,14 +43,6 @@ class CliChat(Chat):
         except Exception as e:
             print(f"{Fore.RED}Error listing resources: {e}")
             return []
-
-    async def get_doc_content(self, doc_id: str) -> str:
-        """Get the content of a document"""
-        try:
-            return await self.mcp_client.read_resource(f"docs://documents/{doc_id}")
-        except Exception as e:
-            print(f"{Fore.RED}Error getting document content for {doc_id}: {e}")
-            return ""
 
     async def get_prompt(self, command: str, doc_id: str) -> list[PromptMessage]:
         """Get a prompt with parameters"""
@@ -170,13 +154,13 @@ The user has a question:
 {query}
 </query>
 
-The following document context is available to help answer their question:
+The following resource context is available to help answer their question:
 <context>
 {added_resources}
 </context>
 
 Instructions:
-- Answer the user's question directly and concisely using the provided document context
+- Answer the user's question directly and concisely using the provided resource context
 - Start with the exact information they need
 - If the user mentions resources with @ (like @report.docx), use the content provided in the context
 - Don't refer to or mention the "provided context" - just use the information naturally

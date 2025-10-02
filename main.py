@@ -104,7 +104,7 @@ async def main():
         
         print(f"{Fore.LIGHTGREEN_EX}✓ MCP Router initialized successfully")
         print(f"{Fore.LIGHTGREEN_EX}Available commands:")
-        print(f"{Fore.LIGHTGREEN_EX}  - Use @ to reference documents (e.g., @report.pdf)")
+        print(f"{Fore.LIGHTGREEN_EX}  - Use @ to reference resources (e.g., @report.pdf)")
         print(f"{Fore.LIGHTGREEN_EX}  - Use / for prompts (e.g., /summarize)")
         print(f"{Fore.LIGHTGREEN_EX}  - Ctrl+C to exit")
         print(f"{Fore.LIGHTGREEN_EX}=================================")
